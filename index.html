@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Oy Verme Sayfası</title>
+  <style>
+    /* Basit stil */
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    button { margin: 10px; padding: 15px 25px; font-size: 18px; cursor: pointer; }
+    #sonuc { margin-top: 20px; font-weight: bold; }
+    #oyListesi { margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <h1>Oy Ver</h1>
+  <button onclick="oyVer('Yiğit')">Yiğit</button>
+  <button onclick="oyVer('İhsan')">İhsan</button>
+  <button onclick="oyVer('Emir')">Emir</button>
+  <button onclick="oyVer('Semih')">Semih</button>
+
+  <div id="sonuc"></div>
+
+  <h2>Canlı Oy Sonuçları</h2>
+  <ul id="oyListesi"></ul>
+
+  <script>
+    const SCRIPT_URL = "BURAYA_APPS_SCRIPT_WEB_APP_URL_YAPISTIR";
+
+    async function oyVer(aday) {
+      const params = new URLSearchParams();
+      params.append("aday", aday);
+      params.append("kullanici", "Anonim"); // İstersen kullanıcı bilgisini değiştir
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: params
+        });
+        const text = await res.text();
+        document.getElementById("sonuc").innerText = text;
+        oySonuclariGetir();
+      } catch (e) {
+        document.getElementById("sonuc").innerText = "Bir hata oluştu.";
+      }
+    }
+
+    async function oySonuclariGetir() {
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const data = await res.json();
+        const liste = document.getElementById("oyListesi");
+        liste.innerHTML = "";
+        for(const aday in data) {
+          const li = document.createElement("li");
+          li.textContent = `${aday}: ${data[aday]} oy`;
+          liste.appendChild(li);
+        }
+      } catch {
+        // Hata durumunda boş bırakabiliriz
+      }
+    }
+
+    oySonuclariGetir();
+    setInterval(oySonuclariGetir, 5000); // 5 saniyede bir güncelle
+  </script>
+</body>
+</html>
